@@ -23,11 +23,11 @@ To get your issuer ID, you must [create an API key for App Store Connect](https:
 ### Create a client
 ```csharp
 var environment = AppleEnvironment.Production;
-var privateKey = @"-----BEGIN EC PRIVATE KEY-----
+var privateKey = @"-----BEGIN PRIVATE KEY-----
 MHcCAQEEIKAHGXdnAFPqFgzxo3Nt2LoHbjaeff404MQ8Q8aBjUXOoAoGCCqGSM49
 AwEHoUQDQgAEi1tGkL1UC9Y3IzZJfEh31oK5d98pOSKuVPS5yUtQWqqxnMggX5DZ
 O4Q+PiRVXDv8SbXuaL1+zbyAfNxHitC7VQ==
------END EC PRIVATE KEY-----";
+-----END PRIVATE KEY-----";
 var keyId = "2X9R4HXF34";
 var issuerId = "57246542-96fe-1a63-e053-0824d011072a";
 var bundleId = "com.example.testbundleid";
