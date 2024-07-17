@@ -2,53 +2,57 @@
 using System.Net.Http.Headers;
 using System.Text.Json;
 
+using Microsoft.Extensions.Logging;
+
 using AppStoreServerApi.Models;
-using JWT.Builder;
-using JWT.Algorithms;
-using System.Security.Cryptography;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AppStoreServerApi;
 
-public class AppStoreClient
+public class AppStoreClient : IAppStoreClient
 {
-    private static readonly string AppstoreAudience = "appstoreconnect-v1";
-    private const long MaxTokenAge = 1800;
-
+    private readonly ILogger _logger;
+    private readonly HttpClientFactory _httpClientFactory;
     private readonly AppleEnvironment _environment;
-    private readonly string _privateKey;
-    private readonly string _keyId;
-    private readonly string _issuerId;
-    private readonly string _bundleId;
+
+    private readonly AppStoreClientJwtFactory _jwtFactory;
 
     public AppStoreClient(AppleEnvironment environment, string privateKey, string keyId, string issuerId, string bundleId)
+        : this(NullLogger<AppStoreClient>.Instance, DeafultHttpClientFactory.Instance, environment, privateKey, keyId, issuerId, bundleId)
     {
+    }
+
+    public AppStoreClient(ILogger<AppStoreClient> logger,
+        HttpClientFactory httpClientFactory,
+        AppleEnvironment environment,
+        string privateKey,
+        string keyId,
+        string issuerId,
+        string bundleId)
+    {
+        _logger = logger;
+        _httpClientFactory = httpClientFactory;
         _environment = environment;
-        _privateKey = privateKey.Replace("-----BEGIN PRIVATE KEY-----", string.Empty)
-            .Replace("-----END PRIVATE KEY-----", string.Empty)
-            .Replace(Environment.NewLine, string.Empty);
-        _keyId = keyId;
-        _issuerId = issuerId;
-        _bundleId = bundleId;
+
+        _jwtFactory = new(privateKey, keyId, issuerId, bundleId);
     }
 
     // https://developer.apple.com/documentation/appstoreserverapi/get_transaction_info
-    public async Task<TransactionInfoResponse> GetTransactionInfoAsync(string transactionId)
+    public async Task<TransactionInfoResponse> GetTransactionInfoAsync(string transactionId, CancellationToken ct = default)
     {
-        var httpClient = new HttpClient();
-        httpClient.BaseAddress = _environment.BaseUrl;
-        var jwt = MakeJWT();
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        using var httpClient = MakeHttpClient();
 
         var requestUrl = $"inApps/v1/transactions/{transactionId}";
 
-        var response = await httpClient.GetAsync(requestUrl);
-        var responseBody = await response.Content.ReadAsStringAsync();
+        using var response = await httpClient.GetAsync(requestUrl, ct);
+        var responseBody = await response.Content.ReadAsStringAsync(ct);
 
         switch (response.StatusCode)
         {
             case HttpStatusCode.OK:
                 return JsonSerializer.Deserialize<TransactionInfoResponse>(responseBody)!;
             case HttpStatusCode.Unauthorized:
+                _jwtFactory.ClearJwt();
                 throw new Exception("The request is unauthorized; the JSON Web Token (JWT) is invalid.");
             default:
                 var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseBody)!;
@@ -56,21 +60,12 @@ public class AppStoreClient
         }
     }
 
-    private string MakeJWT()
+    private HttpClient MakeHttpClient()
     {
-        var now = DateTime.Now;
-        var expiry = now.AddSeconds(MaxTokenAge);
-        var privateKey = ECDsa.Create();
-        privateKey.ImportPkcs8PrivateKey(Convert.FromBase64String(_privateKey), out var _);
-
-        return JwtBuilder.Create()
-            .WithAlgorithm(new ES256Algorithm(ECDsa.Create(), privateKey))
-            .AddHeader(HeaderName.KeyId, _keyId)
-            .IssuedAt(now)
-            .ExpirationTime(expiry)
-            .Issuer(_issuerId)
-            .Audience(AppstoreAudience)
-            .AddClaim("bid", _bundleId)
-            .Encode()!;
+        var jwt = _jwtFactory.GetJwt();
+        var httpClient = _httpClientFactory();
+        httpClient.BaseAddress = _environment.BaseUrl;
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+        return httpClient;
     }
 }
