@@ -4,10 +4,31 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+    <PackageId>MyTribe.AppStoreServerApi</PackageId>
+    <Version>0.1.0</Version>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Authors>Dmitriy Tarasov</Authors>
+    <Company>MyTribe</Company>
+    <Product>MyTribe.AppStoreServerApi</Product>
+    <PackageTags>apple</PackageTags>
+    <Description>
+      A .net 8.0 library to request App Store Server API - https://developer.apple.com/documentation/appstoreserverapi.
+    </Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/my-tribe/AppStoreServerApi</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/my-tribe/AppStoreServerApi</RepositoryUrl>
+    <Copyright>Copyright © Dmitriy Tarasov 2024</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="JWT" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>
