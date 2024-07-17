@@ -1,8 +1,11 @@
-using System.Net;
-
 namespace AppStoreServerApi.Models;
 
-public sealed class Error(long errorCode, string errorMessage) : Exception(errorMessage)
+public class Error : Exception
 {
-    public readonly long ErrorCode = errorCode;
+    public readonly long ErrorCode;
+
+    internal Error(long errorCode, string errorMessage) : base(errorMessage)
+    {
+        ErrorCode = errorCode;
+    }
 }

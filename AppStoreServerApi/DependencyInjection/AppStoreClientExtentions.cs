@@ -24,4 +24,25 @@ public static class AppStoreClientExtentions
                 options.BundleId);
         });
     }
+
+    public static IServiceCollection AddKeyedAppStoreClient(
+        this IServiceCollection serviceCollection,
+        string key,
+        Action<AppStoreClientOptions> configureOptions)
+    {
+        return serviceCollection.AddKeyedSingleton<IAppStoreClient, AppStoreClient>(key, (sp, key) => {
+            var httpClientFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var options = new AppStoreClientOptions(() => httpClientFactory.CreateClient());
+            configureOptions(options);
+            var logger = sp.GetRequiredService<ILoggerFactory>()
+                .CreateLogger<AppStoreClient>();
+            return new AppStoreClient(logger,
+                options.HttpClientFactory,
+                options.Environment,
+                options.PrivateKey,
+                options.KeyId,
+                options.IssuerId,
+                options.BundleId);
+        });
+    }
 }

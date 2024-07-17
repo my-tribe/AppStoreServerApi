@@ -44,20 +44,8 @@ public class AppStoreClient : IAppStoreClient
 
         var requestUrl = $"inApps/v1/transactions/{transactionId}";
 
-        using var response = await httpClient.GetAsync(requestUrl, ct);
-        var responseBody = await response.Content.ReadAsStringAsync(ct);
-
-        switch (response.StatusCode)
-        {
-            case HttpStatusCode.OK:
-                return JsonSerializer.Deserialize<TransactionInfoResponse>(responseBody)!;
-            case HttpStatusCode.Unauthorized:
-                _jwtFactory.ClearJwt();
-                throw new Exception("The request is unauthorized; the JSON Web Token (JWT) is invalid.");
-            default:
-                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseBody)!;
-                throw new Error(errorResponse.ErrorCode, errorResponse.ErrorMessage);
-        }
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<TransactionInfoResponse>(responseMessage, ct);
     }
 
     private HttpClient MakeHttpClient()
@@ -67,5 +55,21 @@ public class AppStoreClient : IAppStoreClient
         httpClient.BaseAddress = _environment.BaseUrl;
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
         return httpClient;
+    }
+
+    private async Task<T> GetResultAsync<T>(HttpResponseMessage responseMessage, CancellationToken ct)
+    {
+        var responseContent = await responseMessage.Content.ReadAsStringAsync(ct);
+        switch (responseMessage.StatusCode)
+        {
+            case HttpStatusCode.OK:
+                return JsonSerializer.Deserialize<T>(responseContent)!;
+            case HttpStatusCode.Unauthorized:
+                _jwtFactory.ClearJwt();
+                throw new UnauthorizedException();
+            default:
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseContent)!;
+                throw errorResponse.MakeTypedError();
+        }
     }
 }
