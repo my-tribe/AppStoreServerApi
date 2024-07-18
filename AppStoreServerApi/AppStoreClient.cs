@@ -14,27 +14,23 @@ public class AppStoreClient : IAppStoreClient
     private readonly ILogger _logger;
     private readonly HttpClientFactory _httpClientFactory;
     private readonly AppleEnvironment _environment;
-
-    private readonly AppStoreClientJwtFactory _jwtFactory;
+    private readonly IJwtProvider _jwtProvider;
 
     public AppStoreClient(AppleEnvironment environment, string privateKey, string keyId, string issuerId, string bundleId)
-        : this(NullLogger<AppStoreClient>.Instance, DeafultHttpClientFactory.Instance, environment, privateKey, keyId, issuerId, bundleId)
+        : this(NullLogger<AppStoreClient>.Instance, DeafultHttpClientFactory.Instance, environment,
+            new AppStoreClientJwtProvider(privateKey, keyId, issuerId, bundleId))
     {
     }
 
     public AppStoreClient(ILogger<AppStoreClient> logger,
         HttpClientFactory httpClientFactory,
         AppleEnvironment environment,
-        string privateKey,
-        string keyId,
-        string issuerId,
-        string bundleId)
+        IJwtProvider jwtProvider)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _environment = environment;
-
-        _jwtFactory = new(privateKey, keyId, issuerId, bundleId);
+        _jwtProvider = jwtProvider;
     }
 
     // https://developer.apple.com/documentation/appstoreserverapi/get_transaction_info
@@ -50,7 +46,7 @@ public class AppStoreClient : IAppStoreClient
 
     private HttpClient MakeHttpClient()
     {
-        var jwt = _jwtFactory.GetJwt();
+        var jwt = _jwtProvider.GetJwt();
         var httpClient = _httpClientFactory();
         httpClient.BaseAddress = _environment.BaseUrl;
         httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
@@ -65,7 +61,7 @@ public class AppStoreClient : IAppStoreClient
             case HttpStatusCode.OK:
                 return JsonSerializer.Deserialize<T>(responseContent)!;
             case HttpStatusCode.Unauthorized:
-                _jwtFactory.ClearJwt();
+                _jwtProvider.ResetJwt();
                 throw new UnauthorizedException();
             default:
                 var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseContent)!;

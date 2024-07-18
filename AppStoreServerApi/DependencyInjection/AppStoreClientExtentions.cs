@@ -15,13 +15,15 @@ public static class AppStoreClientExtentions
             configureOptions(options);
             var logger = sp.GetRequiredService<ILoggerFactory>()
                 .CreateLogger<AppStoreClient>();
-            return new AppStoreClient(logger,
-                options.HttpClientFactory,
-                options.Environment,
+            var jwtProvider = new AppStoreClientJwtProvider(
                 options.PrivateKey,
                 options.KeyId,
                 options.IssuerId,
                 options.BundleId);
+            return new AppStoreClient(logger,
+                options.HttpClientFactory,
+                options.Environment,
+                jwtProvider);
         });
     }
 
@@ -36,13 +38,15 @@ public static class AppStoreClientExtentions
             configureOptions(options);
             var logger = sp.GetRequiredService<ILoggerFactory>()
                 .CreateLogger<AppStoreClient>();
-            return new AppStoreClient(logger,
-                options.HttpClientFactory,
-                options.Environment,
+            var jwtProvider = new AppStoreClientJwtProvider(
                 options.PrivateKey,
                 options.KeyId,
                 options.IssuerId,
                 options.BundleId);
+            return new AppStoreClient(logger,
+                options.HttpClientFactory,
+                options.Environment,
+                jwtProvider);
         });
     }
 }

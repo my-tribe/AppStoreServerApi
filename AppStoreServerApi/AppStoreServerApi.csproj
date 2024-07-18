@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
 
     <PackageId>MyTribe.AppStoreServerApi</PackageId>
-    <Version>0.2.0</Version>
-    <PackageVersion>0.2.0</PackageVersion>
+    <Version>0.3.0</Version>
+    <PackageVersion>0.3.0</PackageVersion>
     <Authors>Dmitriy Tarasov</Authors>
     <Company>MyTribe</Company>
     <Product>MyTribe.AppStoreServerApi</Product>

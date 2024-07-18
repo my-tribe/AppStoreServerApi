@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppStoreServerApi", "AppStoreServerApi\AppStoreServerApi.csproj", "{EC99C236-573D-4B82-AF96-5AAEAA07E061}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AppStoreServerApi.Tests", "AppStoreServerApi.Tests\AppStoreServerApi.Tests.csproj", "{C92EF173-A13A-499E-936D-3040FF8859D9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{EC99C236-573D-4B82-AF96-5AAEAA07E061}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC99C236-573D-4B82-AF96-5AAEAA07E061}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC99C236-573D-4B82-AF96-5AAEAA07E061}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C92EF173-A13A-499E-936D-3040FF8859D9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C92EF173-A13A-499E-936D-3040FF8859D9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C92EF173-A13A-499E-936D-3040FF8859D9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C92EF173-A13A-499E-936D-3040FF8859D9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

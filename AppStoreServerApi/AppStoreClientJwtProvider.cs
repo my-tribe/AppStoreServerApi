@@ -5,11 +5,11 @@ using JWT.Builder;
 
 namespace AppStoreServerApi;
 
-internal sealed class AppStoreClientJwtFactory(
+public sealed class AppStoreClientJwtProvider(
     string privateKey,
     string keyId,
     string issuerId,
-    string bundleId)
+    string bundleId) : IJwtProvider
 {
     private static readonly string AppstoreAudience = "appstoreconnect-v1";
     private const long MaxTokenAge = 1800;
@@ -60,7 +60,7 @@ internal sealed class AppStoreClientJwtFactory(
         return newJwt;
     }
 
-    public void ClearJwt()
+    public void ResetJwt()
     {
         lock (_guard)
         {
