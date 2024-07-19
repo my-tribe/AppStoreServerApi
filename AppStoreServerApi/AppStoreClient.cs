@@ -33,6 +33,49 @@ public class AppStoreClient : IAppStoreClient
         _jwtProvider = jwtProvider;
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/get_transaction_history
+    public async Task<HistoryResponse> GetTransactionHistoryAsync(string transactionId,
+        string? revision = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null,
+        string? productId = null,
+        IReadOnlyCollection<ProductType>? productType = null,
+        InAppOwnershipType? inAppOwnershipType = null,
+        SortOrder? sort = null,
+        bool? revoked = null,
+        IReadOnlyCollection<string>? subscriptionGroupIdentifier = null,
+        CancellationToken ct = default)
+    {
+        if (startDate is not null && endDate is not null && endDate < startDate) throw new ArgumentException(null, nameof(endDate));
+
+        using var httpClient = MakeHttpClient();
+
+        var startDateMs = startDate?.ToUnixTimeMilliseconds();
+        var endDateMs = endDate?.ToUnixTimeMilliseconds();
+
+        var query = new List<string>();
+        if (revision is not null) query.Add($"revision={revision}");
+        if (startDate is not null) query.Add($"startDate={startDateMs}");
+        if (endDate is not null) query.Add($"endDate={endDateMs}");
+        if (productId is not null) query.Add($"productId={productId}");
+        if (productType is not null) query.AddRange(productType.Select(x => $"productType={x}"));
+        if (inAppOwnershipType is not null) query.Add($"inAppOwnershipType={inAppOwnershipType.Value}");
+        if (sort is not null) query.Add($"sort={sort.Value}");
+        if (revoked is not null) query.Add($"revoked={revoked.Value.ToString().ToLower()}");
+        if (subscriptionGroupIdentifier is not null) query.AddRange(subscriptionGroupIdentifier.Select(x => $"subscriptionGroupIdentifier={x}"));
+        var queryStr = string.Join("&", query);
+
+        var requestUrl = queryStr switch {
+            "" => $"inApps/v2/history/{transactionId}",
+            _ => $"inApps/v2/history/{transactionId}?{queryStr}"
+        };
+
+        Console.WriteLine(requestUrl);
+
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<HistoryResponse>(responseMessage, ct);
+    }
+
     // https://developer.apple.com/documentation/appstoreserverapi/get_transaction_info
     public async Task<TransactionInfoResponse> GetTransactionInfoAsync(string transactionId, CancellationToken ct = default)
     {

@@ -12,7 +12,7 @@ public class DateTimeConverter : JsonConverter<DateTime>
 
     public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
     {
-        var unixTime = (long) (value - DateTime.UnixEpoch).TotalMilliseconds;
+        var unixTime = value.ToUnixTimeMilliseconds();
         writer.WriteNumberValue(unixTime);
     }
 }
