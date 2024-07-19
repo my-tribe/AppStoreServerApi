@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 
 using AppStoreServerApi.Models;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Net.Http.Json;
 
 namespace AppStoreServerApi;
 
@@ -105,6 +106,34 @@ public class AppStoreClient : IAppStoreClient
         return await GetResultAsync<StatusResponse>(responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/send_consumption_information
+    public async Task SendConsumptionInformationAsync(string transactionId,
+        AccountTenure accountTenure,
+        string appAccountToken,
+        ConsumptionStatus consumptionStatus,
+        bool customerConsented,
+        DeliveryStatus deliveryStatus,
+        LifetimeDollarsPurchased lifetimeDollarsPurchased,
+        LifetimeDollarsRefunded lifetimeDollarsRefunded,
+        Platform platform,
+        PlayTime playTime,
+        RefundPreference refundPreference,
+        bool sampleContentProvided,
+        UserStatus userStatus,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var request = new ConsumptionRequest(accountTenure, appAccountToken, consumptionStatus, customerConsented,
+            deliveryStatus, lifetimeDollarsPurchased, lifetimeDollarsRefunded, platform, playTime, refundPreference,
+            sampleContentProvided, userStatus);
+
+        var requestUrl = $"inApps/v1/transactions/consumption/{transactionId}";
+
+        using var responseMessage = await httpClient.PutAsJsonAsync(requestUrl, request, ct);
+        await CheckResultAsync(HttpStatusCode.Accepted, responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();
@@ -121,6 +150,22 @@ public class AppStoreClient : IAppStoreClient
         {
             case HttpStatusCode.OK:
                 return JsonSerializer.Deserialize<T>(responseContent)!;
+            case HttpStatusCode.Unauthorized:
+                _jwtProvider.ResetJwt();
+                throw new UnauthorizedException();
+            default:
+                var errorResponse = JsonSerializer.Deserialize<ErrorResponse>(responseContent)!;
+                throw errorResponse.MakeTypedError();
+        }
+    }
+
+    private async Task CheckResultAsync(HttpStatusCode statusCode, HttpResponseMessage responseMessage, CancellationToken ct)
+    {
+        if (responseMessage.StatusCode == statusCode) return;
+
+        var responseContent = await responseMessage.Content.ReadAsStringAsync(ct);
+        switch (responseMessage.StatusCode)
+        {
             case HttpStatusCode.Unauthorized:
                 _jwtProvider.ResetJwt();
                 throw new UnauthorizedException();

@@ -24,4 +24,20 @@ public interface IAppStoreClient
     Task<StatusResponse> GetAllSubscriptionStatusesAsync(string transactionId,
         IReadOnlyCollection<Status>? status = null,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/send_consumption_information
+    Task SendConsumptionInformationAsync(string transactionId,
+        AccountTenure accountTenure,
+        string appAccountToken,
+        ConsumptionStatus consumptionStatus,
+        bool customerConsented,
+        DeliveryStatus deliveryStatus,
+        LifetimeDollarsPurchased lifetimeDollarsPurchased,
+        LifetimeDollarsRefunded lifetimeDollarsRefunded,
+        Platform platform,
+        PlayTime playTime,
+        RefundPreference refundPreference,
+        bool sampleContentProvided,
+        UserStatus userStatus,
+        CancellationToken ct = default);
 }

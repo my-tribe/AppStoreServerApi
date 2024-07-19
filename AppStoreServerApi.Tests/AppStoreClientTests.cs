@@ -248,4 +248,94 @@ public class AppStoreClientTests
         Assert.Equal(errorMessage, exception.Message);
     }
 #endregion GetAllSubscriptionStatusesAsync
+
+#region SendConsumptionInformationAsync
+    [Fact]
+    public async Task SendConsumptionInformationAsync_WhenReceives200_ReturnsStatusResponse()
+    {
+        const string transactionId = "12345";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + $"inApps/v1/transactions/consumption/{transactionId}")
+            .Respond(HttpStatusCode.Accepted);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await client.SendConsumptionInformationAsync(transactionId,
+            AccountTenure.Undeclared, string.Empty, ConsumptionStatus.Undeclared,
+            true, DeliveryStatus.Delivered, LifetimeDollarsPurchased.Undeclared,
+            LifetimeDollarsRefunded.Undeclared, Platform.Undeclared, PlayTime.Undeclared,
+            RefundPreference.Undeclared, true, UserStatus.Undeclared);
+    }
+
+    [Fact]
+    public async Task SendConsumptionInformationAsync_WhenReceives401_ThrowsUnauthorizedException()
+    {
+        const string transactionId = "12345";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v1/transactions/consumption/*")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() => client.SendConsumptionInformationAsync(transactionId,
+            AccountTenure.Undeclared, string.Empty, ConsumptionStatus.Undeclared,
+            true, DeliveryStatus.Delivered, LifetimeDollarsPurchased.Undeclared,
+            LifetimeDollarsRefunded.Undeclared, Platform.Undeclared, PlayTime.Undeclared,
+            RefundPreference.Undeclared, true, UserStatus.Undeclared));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 4000032, typeof(InvalidAccountTenureError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000033, typeof(InvalidAppAccountTokenError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000034, typeof(InvalidConsumptionStatusError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000035, typeof(InvalidCustomerConsentedError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000036, typeof(InvalidDeliveryStatusError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000037, typeof(InvalidLifetimeDollarsPurchasedError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000038, typeof(InvalidLifetimeDollarsRefundedError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000039, typeof(InvalidPlatformError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000040, typeof(InvalidPlayTimeError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000041, typeof(InvalidSampleContentProvidedError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000042, typeof(InvalidUserStatusError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000044, typeof(InvalidRefundPreferenceError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000047, typeof(InvalidTransactionTypeNotSupportedError))]
+    [InlineData(HttpStatusCode.NotFound, 4040010, typeof(TransactionIdNotFoundError))]
+    [InlineData(HttpStatusCode.TooManyRequests, 4290000, typeof(RateLimitExceededError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000000, typeof(GeneralInternalError))]
+    public async Task SendConsumptionInformationAsync_WhenReceivesError_ThrowsCorrespondingException(
+        HttpStatusCode httpStatusCode, long errorCode, Type desiredErrorType)
+    {
+        const string transactionId = "12345";
+        const string errorMessage = "some message";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v1/transactions/consumption/*")
+            .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var exception = (Error) await Assert.ThrowsAsync(desiredErrorType, () => client.SendConsumptionInformationAsync(transactionId,
+            AccountTenure.Undeclared, string.Empty, ConsumptionStatus.Undeclared,
+            true, DeliveryStatus.Delivered, LifetimeDollarsPurchased.Undeclared,
+            LifetimeDollarsRefunded.Undeclared, Platform.Undeclared, PlayTime.Undeclared,
+            RefundPreference.Undeclared, true, UserStatus.Undeclared));
+        Assert.Equal(errorCode, exception.ErrorCode);
+        Assert.Equal(errorMessage, exception.Message);
+    }
+#endregion SendConsumptionInformationAsync
 }
