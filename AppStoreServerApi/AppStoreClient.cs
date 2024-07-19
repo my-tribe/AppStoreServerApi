@@ -58,19 +58,17 @@ public class AppStoreClient : IAppStoreClient
         if (startDate is not null) query.Add($"startDate={startDateMs}");
         if (endDate is not null) query.Add($"endDate={endDateMs}");
         if (productId is not null) query.Add($"productId={productId}");
-        if (productType is not null) query.AddRange(productType.Select(x => $"productType={x}"));
+        if (productType is not null && productType.Count > 0) query.AddRange(productType.Select(x => $"productType={x}"));
         if (inAppOwnershipType is not null) query.Add($"inAppOwnershipType={inAppOwnershipType.Value}");
         if (sort is not null) query.Add($"sort={sort.Value}");
         if (revoked is not null) query.Add($"revoked={revoked.Value.ToString().ToLower()}");
-        if (subscriptionGroupIdentifier is not null) query.AddRange(subscriptionGroupIdentifier.Select(x => $"subscriptionGroupIdentifier={x}"));
+        if (subscriptionGroupIdentifier is not null && subscriptionGroupIdentifier.Count > 0) query.AddRange(subscriptionGroupIdentifier.Select(x => $"subscriptionGroupIdentifier={x}"));
         var queryStr = string.Join("&", query);
 
         var requestUrl = queryStr switch {
             "" => $"inApps/v2/history/{transactionId}",
             _ => $"inApps/v2/history/{transactionId}?{queryStr}"
         };
-
-        Console.WriteLine(requestUrl);
 
         using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
         return await GetResultAsync<HistoryResponse>(responseMessage, ct);
@@ -85,6 +83,26 @@ public class AppStoreClient : IAppStoreClient
 
         using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
         return await GetResultAsync<TransactionInfoResponse>(responseMessage, ct);
+    }
+
+    // https://developer.apple.com/documentation/appstoreserverapi/get_all_subscription_statuses
+    public async Task<StatusResponse> GetAllSubscriptionStatusesAsync(string transactionId,
+        IReadOnlyCollection<Status>? status = null,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var query = new List<string>();
+        if (status is not null && status.Count > 0) query.AddRange(status.Select(x => $"status={x.RawValue}"));
+        var queryStr = string.Join("&", query);
+
+        var requestUrl = queryStr switch {
+            "" => $"inApps/v1/subscriptions/{transactionId}",
+            _ => $"inApps/v1/subscriptions/{transactionId}?{queryStr}"
+        };
+
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<StatusResponse>(responseMessage, ct);
     }
 
     private HttpClient MakeHttpClient()

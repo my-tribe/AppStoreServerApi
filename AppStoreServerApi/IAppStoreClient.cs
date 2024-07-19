@@ -19,4 +19,9 @@ public interface IAppStoreClient
 
     // https://developer.apple.com/documentation/appstoreserverapi/get_transaction_info
     Task<TransactionInfoResponse> GetTransactionInfoAsync(string transactionId, CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/get_all_subscription_statuses
+    Task<StatusResponse> GetAllSubscriptionStatusesAsync(string transactionId,
+        IReadOnlyCollection<Status>? status = null,
+        CancellationToken ct = default);
 }

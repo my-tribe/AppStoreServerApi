@@ -19,6 +19,7 @@ public record ErrorResponse(
             4000023 => new InvalidProductIdError(ErrorCode, ErrorMessage),
             4000024 => new InvalidSubscriptionGroupIdentifierError(ErrorCode, ErrorMessage),
             4000026 => new InvalidInAppOwnershipTypeError(ErrorCode, ErrorMessage),
+            4000031 => new InvalidStatusError(ErrorCode, ErrorMessage),
             4040001 => new AccountNotFoundError(ErrorCode, ErrorMessage),
             4040002 => new AccountNotFoundRetryableError(ErrorCode, ErrorMessage),
             4040003 => new AppNotFoundError(ErrorCode, ErrorMessage),
