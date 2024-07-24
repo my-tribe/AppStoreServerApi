@@ -251,7 +251,7 @@ public class AppStoreClientTests
 
 #region SendConsumptionInformationAsync
     [Fact]
-    public async Task SendConsumptionInformationAsync_WhenReceives200_ReturnsStatusResponse()
+    public async Task SendConsumptionInformationAsync_WhenReceives202_ReturnsStatusResponse()
     {
         const string transactionId = "12345";
         var environment = AppleEnvironment.Production;
@@ -280,7 +280,7 @@ public class AppStoreClientTests
         var jwtProvider = new MockJwtProvider();
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(environment.BaseUrl + "inApps/v1/transactions/consumption/*")
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + "inApps/v1/transactions/consumption/*")
             .Respond(HttpStatusCode.Unauthorized);
 
         HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
@@ -322,7 +322,7 @@ public class AppStoreClientTests
         var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
 
         var mockHttp = new MockHttpMessageHandler();
-        mockHttp.When(environment.BaseUrl + "inApps/v1/transactions/consumption/*")
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + "inApps/v1/transactions/consumption/*")
             .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
 
         HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
@@ -338,4 +338,74 @@ public class AppStoreClientTests
         Assert.Equal(errorMessage, exception.Message);
     }
 #endregion SendConsumptionInformationAsync
+
+#region LookUpOrderIdAsync
+    [Fact]
+    public async Task LookUpOrderIdAsync_WhenReceives200_ReturnsStatusResponse()
+    {
+        const string orderId = "12345";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var responseContent = JsonSerializer.Serialize(new OrderLookupResponse(OrderLookupStatus.InvalidOrEmpty, []));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + $"inApps/v1/lookup/{orderId}")
+            .Respond(MediaTypeNames.Application.Json, responseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var result = await client.LookUpOrderIdAsync(orderId);
+
+        Assert.Equal(OrderLookupStatus.InvalidOrEmpty, result.Status);
+    }
+
+    [Fact]
+    public async Task LookUpOrderIdAsync_WhenReceives401_ThrowsUnauthorizedException()
+    {
+        const string orderId = "12345";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v1/lookup/*")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() => client.LookUpOrderIdAsync(orderId));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 4000000, typeof(GeneralBadRequestError))]
+    [InlineData(HttpStatusCode.TooManyRequests, 4290000, typeof(RateLimitExceededError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000000, typeof(GeneralInternalError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000001, typeof(GeneralInternalRetryableError))]
+    public async Task LookUpOrderIdAsync_WhenReceivesError_ThrowsCorrespondingException(
+        HttpStatusCode httpStatusCode, long errorCode, Type desiredErrorType)
+    {
+        const string orderId = "12345";
+        const string errorMessage = "some message";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v1/lookup/*")
+            .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var exception = (Error) await Assert.ThrowsAsync(desiredErrorType, () => client.LookUpOrderIdAsync(orderId));
+        Assert.Equal(errorCode, exception.ErrorCode);
+        Assert.Equal(errorMessage, exception.Message);
+    }
+#endregion LookUpOrderIdAsync
 }

@@ -9,6 +9,7 @@ public record ErrorResponse(
 {
     internal Error MakeTypedError() =>
         ErrorCode switch {
+            4000000 => new GeneralBadRequestError(ErrorCode, ErrorMessage),
             4000002 => new InvalidAppIdentifierError(ErrorCode, ErrorMessage),
             4000005 => new InvalidRequestRevisionError(ErrorCode, ErrorMessage),
             4000006 => new InvalidTransactionIdError(ErrorCode, ErrorMessage),

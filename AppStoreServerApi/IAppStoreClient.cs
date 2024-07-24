@@ -40,4 +40,7 @@ public interface IAppStoreClient
         bool sampleContentProvided,
         UserStatus userStatus,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/look_up_order_id
+    Task<OrderLookupResponse> LookUpOrderIdAsync(string orderId, CancellationToken ct = default);
 }

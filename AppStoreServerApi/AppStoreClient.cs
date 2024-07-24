@@ -134,6 +134,17 @@ public class AppStoreClient : IAppStoreClient
         await CheckResultAsync(HttpStatusCode.Accepted, responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/look_up_order_id
+    public async Task<OrderLookupResponse> LookUpOrderIdAsync(string orderId, CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var requestUrl = $"inApps/v1/lookup/{orderId}";
+
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<OrderLookupResponse>(responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();
