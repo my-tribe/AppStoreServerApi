@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using AppStoreServerApi.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Net.Http.Json;
+using System.Collections.Immutable;
 
 namespace AppStoreServerApi;
 
@@ -180,6 +181,26 @@ public class AppStoreClient : IAppStoreClient
 
         using var responseMessage = await httpClient.PutAsJsonAsync(requestUrl, request, ct);
         return await GetResultAsync<ExtendRenewalDateResponse>(responseMessage, ct);
+    }
+
+    // https://developer.apple.com/documentation/appstoreserverapi/extend_subscription_renewal_dates_for_all_active_subscribers
+    public async Task<MassExtendRenewalDateResponse> ExtendSubscriptionRenewalDatesForAllActiveSubscribersAsync(
+        string requestIdentifier,
+        int extendByDays,
+        ExtendReasonCode extendReasonCode,
+        string productId,
+        IEnumerable<string>? storefrontCountryCodes = null,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var request = new MassExtendRenewalDateRequest(requestIdentifier, extendByDays, extendReasonCode, productId,
+            storefrontCountryCodes?.ToImmutableArray());
+
+        var requestUrl = "inApps/v1/subscriptions/extend/mass/";
+
+        using var responseMessage = await httpClient.PostAsJsonAsync(requestUrl, request, ct);
+        return await GetResultAsync<MassExtendRenewalDateResponse>(responseMessage, ct);
     }
 
     private HttpClient MakeHttpClient()

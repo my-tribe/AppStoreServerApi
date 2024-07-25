@@ -55,4 +55,13 @@ public interface IAppStoreClient
         ExtendReasonCode extendReasonCode,
         string requestIdentifier,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/extend_subscription_renewal_dates_for_all_active_subscribers
+    Task<MassExtendRenewalDateResponse> ExtendSubscriptionRenewalDatesForAllActiveSubscribersAsync(
+        string requestIdentifier,
+        int extendByDays,
+        ExtendReasonCode extendReasonCode,
+        string productId,
+        IEnumerable<string>? storefrontCountryCodes = null,
+        CancellationToken ct = default);
 }
