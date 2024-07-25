@@ -165,6 +165,23 @@ public class AppStoreClient : IAppStoreClient
         return await GetResultAsync<RefundHistoryResponse>(responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/extend_a_subscription_renewal_date
+    public async Task<ExtendRenewalDateResponse> ExtendSubscriptionRenewalDateAsync(string originalTransactionId,
+        int extendByDays,
+        ExtendReasonCode extendReasonCode,
+        string requestIdentifier,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var request = new ExtendRenewalDateRequest(extendByDays, extendReasonCode, requestIdentifier);
+
+        var requestUrl = $"inApps/v1/subscriptions/extend/{originalTransactionId}";
+
+        using var responseMessage = await httpClient.PutAsJsonAsync(requestUrl, request, ct);
+        return await GetResultAsync<ExtendRenewalDateResponse>(responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();

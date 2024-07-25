@@ -48,4 +48,11 @@ public interface IAppStoreClient
     Task<RefundHistoryResponse> GetRefundHistoryAsync(string transactionId,
         string? revision = null,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/extend_a_subscription_renewal_date
+    Task<ExtendRenewalDateResponse> ExtendSubscriptionRenewalDateAsync(string originalTransactionId,
+        int extendByDays,
+        ExtendReasonCode extendReasonCode,
+        string requestIdentifier,
+        CancellationToken ct = default);
 }

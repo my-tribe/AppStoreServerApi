@@ -482,4 +482,92 @@ public class AppStoreClientTests
         Assert.Equal(errorMessage, exception.Message);
     }
 #endregion GetRefundHistoryAsync
+
+#region ExtendSubscriptionRenewalDateAsync
+    [Fact]
+    public async Task ExtendSubscriptionRenewalDateAsync_WhenReceives200_ReturnsStatusResponse()
+    {
+        const string originalTransactionId = "12345";
+        const int extendByDays = 1;
+        const string requestId = "requstId";
+        const string webOrderLineItemId = "webOrderLineItemId";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var desiredResponse = new ExtendRenewalDateResponse(DateTime.UnixEpoch, originalTransactionId, true, webOrderLineItemId);
+        var responseContent = JsonSerializer.Serialize(desiredResponse);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + $"inApps/v1/subscriptions/extend/{originalTransactionId}")
+            .Respond(MediaTypeNames.Application.Json, responseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var response = await client.ExtendSubscriptionRenewalDateAsync(originalTransactionId,
+            extendByDays, ExtendReasonCode.Undeclared, requestId);
+
+        Assert.Equal(desiredResponse, response);
+    }
+
+    [Fact]
+    public async Task ExtendSubscriptionRenewalDateAsync_WhenReceives401_ThrowsUnauthorizedException()
+    {
+        const string originalTransactionId = "12345";
+        const int extendByDays = 1;
+        const string requestId = "requstId";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + "inApps/v1/subscriptions/extend/*")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() => client.ExtendSubscriptionRenewalDateAsync(originalTransactionId,
+            extendByDays, ExtendReasonCode.Undeclared, requestId));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 4000008, typeof(InvalidOriginalTransactionIdError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000009, typeof(InvalidExtendByDaysError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000010, typeof(InvalidExtendReasonCodeError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000011, typeof(InvalidRequestIdentifierError))]
+    [InlineData(HttpStatusCode.Forbidden, 4030004, typeof(SubscriptionExtensionIneligibleError))]
+    [InlineData(HttpStatusCode.Forbidden, 4030005, typeof(SubscriptionMaxExtensionError))]
+    [InlineData(HttpStatusCode.Forbidden, 4030007, typeof(FamilySharedSubscriptionExtensionIneligibleError))]
+    [InlineData(HttpStatusCode.NotFound, 4040005, typeof(OriginalTransactionIdNotFoundError))]
+    [InlineData(HttpStatusCode.TooManyRequests, 4290000, typeof(RateLimitExceededError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000000, typeof(GeneralInternalError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000001, typeof(GeneralInternalRetryableError))]
+    public async Task ExtendSubscriptionRenewalDateAsync_WhenReceivesError_ThrowsCorrespondingException(
+        HttpStatusCode httpStatusCode, long errorCode, Type desiredErrorType)
+    {
+        const string originalTransactionId = "12345";
+        const int extendByDays = 1;
+        const string requestId = "requstId";
+        const string errorMessage = "some message";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Put, environment.BaseUrl + "inApps/v1/subscriptions/extend/*")
+            .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var exception = (Error) await Assert.ThrowsAsync(desiredErrorType, () => client.ExtendSubscriptionRenewalDateAsync(originalTransactionId,
+            extendByDays, ExtendReasonCode.Undeclared, requestId));
+        Assert.Equal(errorCode, exception.ErrorCode);
+        Assert.Equal(errorMessage, exception.Message);
+    }
+#endregion ExtendSubscriptionRenewalDateAsync
 }
