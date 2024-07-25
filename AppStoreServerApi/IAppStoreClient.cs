@@ -64,4 +64,10 @@ public interface IAppStoreClient
         string productId,
         IEnumerable<string>? storefrontCountryCodes = null,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/get_status_of_subscription_renewal_date_extensions
+    Task<MassExtendRenewalDateStatusResponse> GetStatusOfSubscriptionRenewalDateExtensionsAsync(
+        string productId,
+        string requestIdentifier,
+        CancellationToken ct = default);
 }

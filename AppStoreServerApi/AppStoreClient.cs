@@ -203,6 +203,20 @@ public class AppStoreClient : IAppStoreClient
         return await GetResultAsync<MassExtendRenewalDateResponse>(responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/get_status_of_subscription_renewal_date_extensions
+    public async Task<MassExtendRenewalDateStatusResponse> GetStatusOfSubscriptionRenewalDateExtensionsAsync(
+        string productId,
+        string requestIdentifier,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var requestUrl = $"inApps/v1/subscriptions/extend/mass/{productId}/{requestIdentifier}";
+
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<MassExtendRenewalDateStatusResponse>(responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();
