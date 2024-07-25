@@ -145,6 +145,26 @@ public class AppStoreClient : IAppStoreClient
         return await GetResultAsync<OrderLookupResponse>(responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/get_refund_history
+    public async Task<RefundHistoryResponse> GetRefundHistoryAsync(string transactionId,
+        string? revision = null,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var query = new List<string>();
+        if (revision is not null) query.Add($"revision={revision}");
+        var queryStr = string.Join("&", query);
+
+        var requestUrl = queryStr switch {
+            "" => $"inApps/v2/refund/lookup/{transactionId}",
+            _ => $"inApps/v2/refund/lookup/{transactionId}?{queryStr}"
+        };
+
+        using var responseMessage = await httpClient.GetAsync(requestUrl, ct);
+        return await GetResultAsync<RefundHistoryResponse>(responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();

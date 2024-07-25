@@ -408,4 +408,78 @@ public class AppStoreClientTests
         Assert.Equal(errorMessage, exception.Message);
     }
 #endregion LookUpOrderIdAsync
+
+#region GetRefundHistoryAsync
+    [Fact]
+    public async Task GetRefundHistoryAsync_WhenReceives200_ReturnsHistoryResponse()
+    {
+        const string transactionId = "12345";
+        const string revision = "revision";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var desiredResponse = new RefundHistoryResponse(true, revision, []);
+        var responseContent = JsonSerializer.Serialize(desiredResponse);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + $"inApps/v2/refund/lookup/{transactionId}")
+            .Respond(MediaTypeNames.Application.Json, responseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var result = await client.GetRefundHistoryAsync(transactionId);
+
+        Assert.Equal(desiredResponse.Revision, result.Revision);
+    }
+
+    [Fact]
+    public async Task GetRefundHistoryAsync_WhenReceives401_ThrowsUnauthorizedException()
+    {
+        const string transactionId = "12345";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v2/refund/lookup/*")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() => client.GetRefundHistoryAsync(transactionId));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 4000005, typeof(InvalidRequestRevisionError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000006, typeof(InvalidTransactionIdError))]
+    [InlineData(HttpStatusCode.NotFound, 4040010, typeof(TransactionIdNotFoundError))]
+    [InlineData(HttpStatusCode.TooManyRequests, 4290000, typeof(RateLimitExceededError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000000, typeof(GeneralInternalError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000001, typeof(GeneralInternalRetryableError))]
+    public async Task GetRefundHistoryAsync_WhenReceivesError_ThrowsCorrespondingException(
+        HttpStatusCode httpStatusCode, long errorCode, Type desiredErrorType)
+    {
+        const string transactionId = "12345";
+        const string errorMessage = "some message";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(environment.BaseUrl + "inApps/v2/refund/lookup/*")
+            .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var exception = (Error) await Assert.ThrowsAsync(desiredErrorType, () => client.GetRefundHistoryAsync(transactionId));
+        Assert.Equal(errorCode, exception.ErrorCode);
+        Assert.Equal(errorMessage, exception.Message);
+    }
+#endregion GetRefundHistoryAsync
 }

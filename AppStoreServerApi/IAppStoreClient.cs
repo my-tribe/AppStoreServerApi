@@ -43,4 +43,9 @@ public interface IAppStoreClient
 
     // https://developer.apple.com/documentation/appstoreserverapi/look_up_order_id
     Task<OrderLookupResponse> LookUpOrderIdAsync(string orderId, CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/get_refund_history
+    Task<RefundHistoryResponse> GetRefundHistoryAsync(string transactionId,
+        string? revision = null,
+        CancellationToken ct = default);
 }
