@@ -70,4 +70,15 @@ public interface IAppStoreClient
         string productId,
         string requestIdentifier,
         CancellationToken ct = default);
+
+    // https://developer.apple.com/documentation/appstoreserverapi/get_notification_history
+    Task<NotificationHistoryResponse> GetNotificationHistoryAsync(
+        DateTime startDate,
+        DateTime endDate,
+        NotificationType? notificationType = null,
+        NotificationSubtype? notificationSubtype = null,
+        bool onlyFailures = false,
+        string? transactionId = null,
+        string? paginationToken = null,
+        CancellationToken ct = default);
 }

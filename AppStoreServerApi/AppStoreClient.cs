@@ -217,6 +217,34 @@ public class AppStoreClient : IAppStoreClient
         return await GetResultAsync<MassExtendRenewalDateStatusResponse>(responseMessage, ct);
     }
 
+    // https://developer.apple.com/documentation/appstoreserverapi/get_notification_history
+    public async Task<NotificationHistoryResponse> GetNotificationHistoryAsync(
+        DateTime startDate,
+        DateTime endDate,
+        NotificationType? notificationType = null,
+        NotificationSubtype? notificationSubtype = null,
+        bool onlyFailures = false,
+        string? transactionId = null,
+        string? paginationToken = null,
+        CancellationToken ct = default)
+    {
+        using var httpClient = MakeHttpClient();
+
+        var query = new List<string>();
+        if (paginationToken is not null) query.Add($"paginationToken={paginationToken}");
+        var queryStr = string.Join("&", query);
+
+        var request = new NotificationHistoryRequest(startDate, endDate, notificationType, notificationSubtype, onlyFailures, transactionId);
+
+        var requestUrl = queryStr switch {
+            "" => "inApps/v1/notifications/history",
+            _ => $"inApps/v1/notifications/history?{queryStr}"
+        };
+
+        using var responseMessage = await httpClient.PostAsJsonAsync(requestUrl, request, ct);
+        return await GetResultAsync<NotificationHistoryResponse>(responseMessage, ct);
+    }
+
     private HttpClient MakeHttpClient()
     {
         var jwt = _jwtProvider.GetJwt();

@@ -734,4 +734,84 @@ public class AppStoreClientTests
         Assert.Equal(errorMessage, exception.Message);
     }
 #endregion GetStatusOfSubscriptionRenewalDateExtensionsAsync
+
+#region GetNotificationHistoryAsync
+    [Fact]
+    public async Task GetNotificationHistoryAsync_WhenReceives200_ReturnsTransactionInfoResponse()
+    {
+        const string paginationToken = "paginationToken";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var desiredResponse = new NotificationHistoryResponse([], true, paginationToken);
+        var responseContent = JsonSerializer.Serialize(desiredResponse);
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, environment.BaseUrl + "inApps/v1/notifications/history")
+            .Respond(MediaTypeNames.Application.Json, responseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var result = await client.GetNotificationHistoryAsync(DateTime.MinValue, DateTime.MaxValue);
+
+        Assert.Equal(desiredResponse.HasMore, result.HasMore);
+        Assert.Equal(desiredResponse.PaginationToken, result.PaginationToken);
+    }
+
+    [Fact]
+    public async Task GetNotificationHistoryAsync_WhenReceives401_ThrowsUnauthorizedException()
+    {
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, environment.BaseUrl + "inApps/v1/notifications/history")
+            .Respond(HttpStatusCode.Unauthorized);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        await Assert.ThrowsAsync<UnauthorizedException>(() => client.GetNotificationHistoryAsync(DateTime.MinValue, DateTime.MaxValue));
+    }
+
+    [Theory]
+    [InlineData(HttpStatusCode.BadRequest, 4000006, typeof(InvalidTransactionIdError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000012, typeof(StartDateTooFarInPastError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000013, typeof(StartDateAfterEndDateError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000014, typeof(InvalidPaginationTokenError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000015, typeof(InvalidStartDateError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000016, typeof(InvalidEndDateError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000017, typeof(PaginationTokenExpiredError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000018, typeof(InvalidNotificationTypeError))]
+    [InlineData(HttpStatusCode.BadRequest, 4000019, typeof(MultipleFiltersSuppliedError))]
+    [InlineData(HttpStatusCode.NotFound, 4040001, typeof(AccountNotFoundError))]
+    [InlineData(HttpStatusCode.NotFound, 4040010, typeof(TransactionIdNotFoundError))]
+    [InlineData(HttpStatusCode.TooManyRequests, 4290000, typeof(RateLimitExceededError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000000, typeof(GeneralInternalError))]
+    [InlineData(HttpStatusCode.InternalServerError, 5000001, typeof(GeneralInternalRetryableError))]
+    public async Task GetNotificationHistoryAsync_WhenReceivesError_ThrowsCorrespondingException(
+        HttpStatusCode httpStatusCode, long errorCode, Type desiredErrorType)
+    {
+        const string errorMessage = "some message";
+        var environment = AppleEnvironment.Production;
+        var jwtProvider = new MockJwtProvider();
+
+        var errorResponseContent = JsonSerializer.Serialize(new ErrorResponse(errorCode, errorMessage));
+
+        var mockHttp = new MockHttpMessageHandler();
+        mockHttp.When(HttpMethod.Post, environment.BaseUrl + "inApps/v1/notifications/history")
+            .Respond(httpStatusCode, MediaTypeNames.Application.Json, errorResponseContent);
+
+        HttpClient HttpClientFactory() => mockHttp.ToHttpClient();
+
+        var client = new AppStoreClient(NullLogger<AppStoreClient>.Instance, HttpClientFactory, environment, jwtProvider);
+
+        var exception = (Error) await Assert.ThrowsAsync(desiredErrorType, () => client.GetNotificationHistoryAsync(DateTime.MinValue, DateTime.MaxValue));
+        Assert.Equal(errorCode, exception.ErrorCode);
+        Assert.Equal(errorMessage, exception.Message);
+    }
+#endregion GetNotificationHistoryAsync
 }
