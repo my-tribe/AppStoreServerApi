@@ -5,7 +5,7 @@ A .net 8.0 library to request [App Store Server API](https://developer.apple.com
 This library is already working but work is still in progress. Don't hesitate to contribute if you see any possible improvment or fixes.
 
 ## Features
-- Transaction information endpoint
+- Implemented all apis corresponding to App Store Server API [verison 1.13](https://developer.apple.com/documentation/appstoreserverapi/app_store_server_api_changelog#4444148)
 - Typed responses
 - Manages authentication tokens for you
 
@@ -24,9 +24,7 @@ To get your issuer ID, you must [create an API key for App Store Connect](https:
 ```csharp
 var environment = AppleEnvironment.Production;
 var privateKey = @"-----BEGIN PRIVATE KEY-----
-MHcCAQEEIKAHGXdnAFPqFgzxo3Nt2LoHbjaeff404MQ8Q8aBjUXOoAoGCCqGSM49
-AwEHoUQDQgAEi1tGkL1UC9Y3IzZJfEh31oK5d98pOSKuVPS5yUtQWqqxnMggX5DZ
-O4Q+PiRVXDv8SbXuaL1+zbyAfNxHitC7VQ==
+....
 -----END PRIVATE KEY-----";
 var keyId = "2X9R4HXF34";
 var issuerId = "57246542-96fe-1a63-e053-0824d011072a";
