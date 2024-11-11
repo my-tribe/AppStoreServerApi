@@ -9,6 +9,12 @@ This library is already working but work is still in progress. Don't hesitate to
 - Typed responses
 - Manages authentication tokens for you
 
+## Installation
+The library is available on NuGet. You can install it using the following command:
+```console
+dotnet add package MyTribe.AppStoreServerApi
+```
+
 ## Usage
 ### Prerequisites
 To get started, you must obtain the following:
