@@ -7,6 +7,7 @@ namespace AppStoreServerApi.Models;
 
 // https://developer.apple.com/documentation/appstoreserverapi/jwsrenewalinfodecodedpayload
 public record JWSRenewalInfoDecodedPayload(
+    [property: JsonPropertyName("appAccountToken")] string? AppAccountToken,
     [property: JsonPropertyName("autoRenewProductId")] string AutoRenewProductId,
     [property: JsonPropertyName("autoRenewStatus")] AutoRenewStatus AutoRenewStatus,
     [property: JsonPropertyName("currency")] string Currency,
