@@ -5,7 +5,7 @@ A .net 8.0 library to request [App Store Server API](https://developer.apple.com
 This library is already working but work is still in progress. Don't hesitate to contribute if you see any possible improvment or fixes.
 
 ## Features
-- Implemented all apis corresponding to App Store Server API [verison 1.13](https://developer.apple.com/documentation/appstoreserverapi/app_store_server_api_changelog#4444148)
+- Implemented all apis corresponding to App Store Server API [verison 1.15](https://developer.apple.com/documentation/appstoreserverapi/app-store-server-api-changelog#115-20250221)
 - Typed responses
 - Manages authentication tokens for you
 
@@ -40,5 +40,5 @@ var client = new AppStoreClient(environment, privateKey, keyId, issuerId, bundle
 ```
 
 ## Links
-[App Store Server API](https://developer.apple.com/documentation/appstoreserverapi)  
+[App Store Server API](https://developer.apple.com/documentation/appstoreserverapi)
 [App Store Server API changelog](https://developer.apple.com/documentation/appstoreserverapi/app_store_server_api_changelog)
