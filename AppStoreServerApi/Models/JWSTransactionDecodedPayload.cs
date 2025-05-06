@@ -5,6 +5,7 @@ namespace AppStoreServerApi.Models;
 // https://developer.apple.com/documentation/appstoreserverapi/jwstransactiondecodedpayload
 public record JWSTransactionDecodedPayload(
     [property: JsonPropertyName("appAccountToken")] string? AppAccountToken,
+    [property: JsonPropertyName("appTransactionId")] string AppTransactionId,
     [property: JsonPropertyName("bundleId")] string BundleId,
     [property: JsonPropertyName("currency")] string? Currency,
     [property: JsonPropertyName("environment")] Environment Environment,
@@ -13,6 +14,7 @@ public record JWSTransactionDecodedPayload(
     [property: JsonPropertyName("isUpgraded")] bool? IsUpgraded,
     [property: JsonPropertyName("offerDiscountType")] OfferDiscountType? OfferDiscountType,
     [property: JsonPropertyName("offerIdentifier")] string? OfferIdentifier,
+    [property: JsonPropertyName("offerPeriod")] string? OfferPeriod,
     [property: JsonPropertyName("offerType")] OfferType? OfferType,
     [property: JsonPropertyName("originalPurchaseDate"), JsonConverter(typeof(Json.DateTimeConverter))] DateTime OriginalPurchaseDate,
     [property: JsonPropertyName("originalTransactionId")] string OriginalTransactionId,

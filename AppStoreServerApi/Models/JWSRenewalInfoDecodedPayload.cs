@@ -8,6 +8,7 @@ namespace AppStoreServerApi.Models;
 // https://developer.apple.com/documentation/appstoreserverapi/jwsrenewalinfodecodedpayload
 public record JWSRenewalInfoDecodedPayload(
     [property: JsonPropertyName("appAccountToken")] string? AppAccountToken,
+    [property: JsonPropertyName("appTransactionId")] string AppTransactionId,
     [property: JsonPropertyName("autoRenewProductId")] string AutoRenewProductId,
     [property: JsonPropertyName("autoRenewStatus")] AutoRenewStatus AutoRenewStatus,
     [property: JsonPropertyName("currency")] string Currency,
@@ -18,6 +19,7 @@ public record JWSRenewalInfoDecodedPayload(
     [property: JsonPropertyName("isInBillingRetryPeriod")] bool IsInBillingRetryPeriod,
     [property: JsonPropertyName("offerDiscountType")] OfferDiscountType OfferDiscountType,
     [property: JsonPropertyName("offerIdentifier")] string? OfferIdentifier,
+    [property: JsonPropertyName("offerPeriod")] string? OfferPeriod,
     [property: JsonPropertyName("offerType")] OfferType OfferType,
     [property: JsonPropertyName("originalTransactionId")] string OriginalTransactionId,
     [property: JsonPropertyName("priceIncreaseStatus")] PriceIncreaseStatus? PriceIncreaseStatus,
