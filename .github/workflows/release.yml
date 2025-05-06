@@ -23,4 +23,4 @@ jobs:
         run: dotnet pack AppStoreServerApi/AppStoreServerApi.csproj --configuration Release
 
       - name: Push to NuGet
-        run: dotnet nuget push AppStoreServerApi/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }}
+        run: dotnet nuget push AppStoreServerApi/bin/Release/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
