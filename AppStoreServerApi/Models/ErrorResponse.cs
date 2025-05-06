@@ -46,6 +46,7 @@ public record ErrorResponse(
             4000042 => new InvalidUserStatusError(ErrorCode, ErrorMessage),
             4000044 => new InvalidRefundPreferenceError(ErrorCode, ErrorMessage),
             4000047 => new InvalidTransactionTypeNotSupportedError(ErrorCode, ErrorMessage),
+            4000048 => new AppTransactionIdNotSupportedError(ErrorCode, ErrorMessage),
             4030004 => new SubscriptionExtensionIneligibleError(ErrorCode, ErrorMessage),
             4030005 => new SubscriptionMaxExtensionError(ErrorCode, ErrorMessage),
             4030007 => new FamilySharedSubscriptionExtensionIneligibleError(ErrorCode, ErrorMessage),
