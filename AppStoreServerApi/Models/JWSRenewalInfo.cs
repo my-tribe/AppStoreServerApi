@@ -7,8 +7,8 @@ using JWT.Builder;
 namespace AppStoreServerApi.Models;
 
 // https://developer.apple.com/documentation/appstoreserverapi/jwsrenewalinfo
-[JsonConverter(typeof(JWSRenewalInfoConverter))]
-public record JWSRenewalInfo(string RawValue)
+[JsonConverter(typeof(RawStringConverter<JWSRenewalInfo>))]
+public record JWSRenewalInfo(string RawValue) : IRawString<JWSRenewalInfo>
 {
     private JWSDecodedHeader? _decodedHeader;
     public JWSDecodedHeader DecodedHeader =>
@@ -20,4 +20,7 @@ public record JWSRenewalInfo(string RawValue)
         _decodedPayload ??= JwtBuilder.Create()
             .DoNotVerifySignature()
             .Decode<JWSRenewalInfoDecodedPayload>(RawValue);
+
+    static JWSRenewalInfo IRawString<JWSRenewalInfo>.FromRaw(string rawValue) => new(rawValue);
+    string IRawString<JWSRenewalInfo>.IntoRaw() => RawValue;
 }

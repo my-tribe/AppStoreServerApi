@@ -7,8 +7,8 @@ using JWT.Builder;
 namespace AppStoreServerApi.Models;
 
 // https://developer.apple.com/documentation/appstoreserverapi/jwstransaction
-[JsonConverter(typeof(JWSTransactionConverter))]
-public record JWSTransaction(string RawValue)
+[JsonConverter(typeof(RawStringConverter<JWSTransaction>))]
+public record JWSTransaction(string RawValue) : IRawString<JWSTransaction>
 {
     private JWSDecodedHeader? _decodedHeader;
     public JWSDecodedHeader DecodedHeader =>
@@ -20,4 +20,7 @@ public record JWSTransaction(string RawValue)
         _decodedPayload ??= JwtBuilder.Create()
             .DoNotVerifySignature()
             .Decode<JWSTransactionDecodedPayload>(RawValue);
+
+    static JWSTransaction IRawString<JWSTransaction>.FromRaw(string rawValue) => new(rawValue);
+    string IRawString<JWSTransaction>.IntoRaw() => RawValue;
 }
