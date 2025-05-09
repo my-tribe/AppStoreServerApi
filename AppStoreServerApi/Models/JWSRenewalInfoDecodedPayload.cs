@@ -27,5 +27,6 @@ public record JWSRenewalInfoDecodedPayload(
     [property: JsonPropertyName("recentSubscriptionStartDate"), JsonConverter(typeof(DateTimeConverter))] DateTime RecentSubscriptionStartDate,
     [property: JsonPropertyName("renewalDate"), JsonConverter(typeof(DateTimeConverter))] DateTime RenewalDate,
     [property: JsonPropertyName("renewalPrice")] long RenewalPrice,
-    [property: JsonPropertyName("signedDate"), JsonConverter(typeof(DateTimeConverter))] DateTime SignedDate
+    [property: JsonPropertyName("signedDate"), JsonConverter(typeof(DateTimeConverter))] DateTime SignedDate,
+    [property: JsonPropertyName("advancedCommerceInfo")] AdvancedCommerceRenewalInfo? AdvancedCommerceInfo
 );

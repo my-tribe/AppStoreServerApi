@@ -40,5 +40,5 @@ var client = new AppStoreClient(environment, privateKey, keyId, issuerId, bundle
 ```
 
 ## Links
-[App Store Server API](https://developer.apple.com/documentation/appstoreserverapi)
+[App Store Server API](https://developer.apple.com/documentation/appstoreserverapi)  
 [App Store Server API changelog](https://developer.apple.com/documentation/appstoreserverapi/app_store_server_api_changelog)

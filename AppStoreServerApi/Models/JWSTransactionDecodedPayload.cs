@@ -31,5 +31,6 @@ public record JWSTransactionDecodedPayload(
     [property: JsonPropertyName("transactionId")] string TransactionId,
     [property: JsonPropertyName("transactionReason")] TransactionReason TransactionReason,
     [property: JsonPropertyName("type")] InAppPurchaseProductType Type,
-    [property: JsonPropertyName("webOrderLineItemId")] string? WebOrderLineItemId
+    [property: JsonPropertyName("webOrderLineItemId")] string? WebOrderLineItemId,
+    [property: JsonPropertyName("advancedCommerceInfo")] AdvancedCommerceTransactionInfo? AdvancedCommerceInfo
 );
