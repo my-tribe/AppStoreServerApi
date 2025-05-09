@@ -1,20 +1,25 @@
 using System.Text.Json.Serialization;
 
+using AppStoreServerApi.Json;
+
 namespace AppStoreServerApi.Models;
 
 // https://developer.apple.com/documentation/appstoreserverapi/sendattemptresult
-[JsonConverter(typeof(JsonStringEnumConverter<SendAttemptResult>))]
-public enum SendAttemptResult
+[JsonConverter(typeof(RawStringConverter<SendAttemptResult>))]
+public record SendAttemptResult(string RawValue) : IRawString<SendAttemptResult>
 {
-    SUCCESS,
-    CIRCULAR_REDIRECT,
-    INVALID_RESPONSE,
-    NO_RESPONSE,
-    OTHER,
-    PREMATURE_CLOSE,
-    SOCKET_ISSUE,
-    TIMED_OUT,
-    TLS_ISSUE,
-    UNSUCCESSFUL_HTTP_RESPONSE_CODE,
-    UNSUPPORTED_CHARSET
+    public static readonly SendAttemptResult Success = new("SUCCESS");
+    public static readonly SendAttemptResult CircularRedirect = new("CIRCULAR_REDIRECT");
+    public static readonly SendAttemptResult InvalidResponse = new("INVALID_RESPONSE");
+    public static readonly SendAttemptResult NoResponse = new("NO_RESPONSE");
+    public static readonly SendAttemptResult Other = new("OTHER");
+    public static readonly SendAttemptResult PrematureClose = new("PREMATURE_CLOSE");
+    public static readonly SendAttemptResult SocketIssue = new("SOCKET_ISSUE");
+    public static readonly SendAttemptResult TimedOut = new("TIMED_OUT");
+    public static readonly SendAttemptResult TlsIssue = new("TLS_ISSUE");
+    public static readonly SendAttemptResult UnsuccessfulHttpResponseCode = new("UNSUCCESSFUL_HTTP_RESPONSE_CODE");
+    public static readonly SendAttemptResult UnsupportedCharset = new("UNSUPPORTED_CHARSET");
+
+    static SendAttemptResult IRawString<SendAttemptResult>.FromRaw(string rawValue) => new(rawValue);
+    string IRawString<SendAttemptResult>.IntoRaw() => RawValue;
 }

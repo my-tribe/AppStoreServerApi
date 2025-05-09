@@ -61,7 +61,7 @@ public class AppStoreClient : IAppStoreClient
         if (endDate is not null) query.Add($"endDate={endDateMs}");
         if (productId is not null) query.Add($"productId={productId}");
         if (productType is not null && productType.Count > 0) query.AddRange(productType.Select(x => $"productType={x}"));
-        if (inAppOwnershipType is not null) query.Add($"inAppOwnershipType={inAppOwnershipType.Value}");
+        if (inAppOwnershipType is not null) query.Add($"inAppOwnershipType={inAppOwnershipType.RawValue}");
         if (sort is not null) query.Add($"sort={sort.Value}");
         if (revoked is not null) query.Add($"revoked={revoked.Value.ToString().ToLower()}");
         if (subscriptionGroupIdentifier is not null && subscriptionGroupIdentifier.Count > 0) query.AddRange(subscriptionGroupIdentifier.Select(x => $"subscriptionGroupIdentifier={x}"));
