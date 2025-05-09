@@ -6,8 +6,8 @@
     <Nullable>enable</Nullable>
 
     <PackageId>MyTribe.AppStoreServerApi</PackageId>
-    <Version>0.4.0</Version>
-    <PackageVersion>0.4.0</PackageVersion>
+    <Version>1.0.0</Version>
+    <PackageVersion>1.0.0</PackageVersion>
     <Authors>Dmitriy Tarasov</Authors>
     <Company>MyTribe</Company>
     <Product>MyTribe.AppStoreServerApi</Product>
@@ -19,7 +19,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/my-tribe/AppStoreServerApi</PackageProjectUrl>
     <RepositoryUrl>https://github.com/my-tribe/AppStoreServerApi</RepositoryUrl>
-    <Copyright>Copyright © Dmitriy Tarasov 2024</Copyright>
+    <Copyright>Copyright © Dmitriy Tarasov 2025</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
