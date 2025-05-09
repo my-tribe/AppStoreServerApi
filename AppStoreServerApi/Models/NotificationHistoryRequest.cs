@@ -9,7 +9,7 @@ public record NotificationHistoryRequest(
     [property: JsonPropertyName("startDate"), JsonConverter(typeof(DateTimeConverter))] DateTime StartDate,
     [property: JsonPropertyName("endDate"), JsonConverter(typeof(DateTimeConverter))] DateTime EndDate,
     [property: JsonPropertyName("notificationType")] NotificationType? NotificationType,
-    [property: JsonPropertyName("notificationSubtype")] NotificationSubtype? NotificationSubtype,
+    [property: JsonPropertyName("notificationSubtype")] Subtype? NotificationSubtype,
     [property: JsonPropertyName("onlyFailures")] bool? OnlyFailures,
     [property: JsonPropertyName("transactionId")] string? TransactionId
 );

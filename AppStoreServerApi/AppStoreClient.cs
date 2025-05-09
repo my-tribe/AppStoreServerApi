@@ -222,7 +222,7 @@ public class AppStoreClient : IAppStoreClient
         DateTime startDate,
         DateTime endDate,
         NotificationType? notificationType = null,
-        NotificationSubtype? notificationSubtype = null,
+        Subtype? notificationSubtype = null,
         bool onlyFailures = false,
         string? transactionId = null,
         string? paginationToken = null,

@@ -3,8 +3,8 @@ using System.Text.Json.Serialization;
 namespace AppStoreServerApi.Models;
 
 // https://developer.apple.com/documentation/appstoreservernotifications/subtype
-[JsonConverter(typeof(JsonStringEnumConverter<NotificationSubtype>))]
-public enum NotificationSubtype
+[JsonConverter(typeof(JsonStringEnumConverter<Subtype>))]
+public enum Subtype
 {
     ACCEPTED,
     AUTO_RENEW_DISABLED,
