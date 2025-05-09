@@ -15,9 +15,9 @@ public record JWSRenewalInfo(string RawValue)
         _decodedHeader ??= JwtBuilder.Create()
             .DecodeHeader<JWSDecodedHeader>(RawValue);
 
-    private JWSTransactionDecodedPayload? _decodedPayload;
-    public JWSTransactionDecodedPayload DecodedPayload =>
+    private JWSRenewalInfoDecodedPayload? _decodedPayload;
+    public JWSRenewalInfoDecodedPayload DecodedPayload =>
         _decodedPayload ??= JwtBuilder.Create()
             .DoNotVerifySignature()
-            .Decode<JWSTransactionDecodedPayload>(RawValue);
+            .Decode<JWSRenewalInfoDecodedPayload>(RawValue);
 }
