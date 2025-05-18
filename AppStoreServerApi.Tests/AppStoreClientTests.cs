@@ -21,7 +21,7 @@ public class AppStoreClientTests
         var environment = AppleEnvironment.Production;
         var jwtProvider = new MockJwtProvider();
 
-        var desiredResponse = new HistoryResponse(100500, "bundleId", Models.Environment.Production, false, string.Empty, []);
+        var desiredResponse = new HistoryResponse(100500, "bundleId", AppStoreServerApi.Models.Environment.Production, false, string.Empty, []);
         var responseContent = JsonSerializer.Serialize(desiredResponse);
 
         var mockHttp = new MockHttpMessageHandler();
@@ -179,7 +179,7 @@ public class AppStoreClientTests
         var environment = AppleEnvironment.Production;
         var jwtProvider = new MockJwtProvider();
 
-        var desiredResponse = new StatusResponse([], Models.Environment.Production, 100500, "bundleId");
+        var desiredResponse = new StatusResponse([], AppStoreServerApi.Models.Environment.Production, 100500, "bundleId");
         var responseContent = JsonSerializer.Serialize(desiredResponse);
 
         var mockHttp = new MockHttpMessageHandler();
